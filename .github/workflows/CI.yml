@@ -21,9 +21,6 @@ jobs:
             rust: beta
             features: --all-features
           - os: ubuntu-latest
-            rust: 1.66
-            features: --features improved_unicode
-          - os: ubuntu-latest
             rust: stable
             features: --all-features
             target: --target armv5te-unknown-linux-gnueabi
