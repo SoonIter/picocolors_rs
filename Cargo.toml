@@ -2,7 +2,7 @@
 name = "picocolors_rs"
 description = "rust version of picocolors"
 keywords = ["cli", "colors"]
-version = "0.0.1"
+version = "0.1.0"
 license = "MIT"
 edition = "2021"
 readme = "README.md"
