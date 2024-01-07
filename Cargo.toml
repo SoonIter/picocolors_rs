@@ -1,10 +1,7 @@
 [package]
 name = "picocolors_rs"
 description = "rust version of picocolors"
-keywords = [
-  "cli",
-  "colors",
-]
+keywords = ["cli", "colors"]
 version = "0.0.1"
 license = "MIT"
 edition = "2021"
@@ -14,4 +11,9 @@ authors = ["SoonIter"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
+[dev-dependencies]
+criterion = "0.5.1"
+
+[[bench]]
+name = "bench"
+harness = false
