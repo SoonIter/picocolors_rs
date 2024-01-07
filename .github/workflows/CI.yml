@@ -1,93 +1,47 @@
 name: CI
-
 on:
   push:
-    branches: ['main']
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.yml'
+      - '!.github/workflows/ci.yml'
   pull_request:
+    types: [opened, synchronize]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.yml'
+      - '!.github/workflows/ci.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   test:
+    name: Test
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        rust: [stable]
-        features: [--all-features]
-        target: [""]
         include:
+          - os: windows-latest
           - os: ubuntu-latest
-            rust: stable
-            features: ""
-          - os: ubuntu-latest
-            rust: beta
-            features: --all-features
-          - os: ubuntu-latest
-            rust: stable
-            features: --all-features
-            target: --target armv5te-unknown-linux-gnueabi
-            use-cross: true
 
     runs-on: ${{ matrix.os }}
-
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/github-script@v6
-        id: rust-target
+      - uses: actions/checkout@v4
+      - uses: moonrepo/setup-rust@v1
         with:
-          script: |
-            const target = '${{ matrix.target }}'
-            if (target) {
-              const rustTarget = target.slice('--target'.length).trim()
-              core.setOutput('rust-target', rustTarget)
-            } else {
-              core.setOutput('rust-target', '')
-            }
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ matrix.rust }}
-          target: ${{ steps.rust-target.outputs.rust-target }}
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          use-cross: ${{ matrix.use-cross }}
-          command: build
-          args: --workspace --all-targets ${{ matrix.target }}
-      - uses: actions-rs/cargo@v1
-        with:
-          use-cross: ${{ matrix.use-cross }}
-          command: test
-          args: --workspace ${{ matrix.target }}
-      - uses: actions-rs/cargo@v1
-        with:
-          use-cross: ${{ matrix.use-cross }}
-          command: test
-          args: --workspace ${{ matrix.features }} ${{ matrix.target }}
+          bins: just, cargo-nextest, cargo-codspeed
+          cache-base: '^(main|develop-)'
+          components: clippy
 
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-          components: rustfmt, clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --workspace --all-targets --all-features -- -D warnings
-      - name: doc
-        run: cargo doc --no-deps --document-private-items
-        env:
-          RUSTDOCFLAGS: -Dwarnings
+      - uses: mozilla-actions/sccache-action@v0.0.3
 
-  audit:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: EmbarkStudios/cargo-deny-action@v1
+      - name: Run linter
+        run: just lint
+
+      - name: Run Test
+        run: just test
+

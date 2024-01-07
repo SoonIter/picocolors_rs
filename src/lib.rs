@@ -1,13 +1,14 @@
 pub fn formatter(s1: &'static str, s2: &'static str) -> impl Fn(&str) -> String {
-    move |text: &str| format!("{}{}{}", s1, text, s2)
+  move |text: &str| format!("{}{}{}", s1, text, s2)
 }
 
 macro_rules! make_color {
     ( $( $name:ident: [$begin:expr, $end:expr]),* ) => {
         $(
-           pub fn $name(content:&str) -> String {
-                formatter($begin, $end)(content)
-            }
+           pub fn $name<T: AsRef<str>>(content: T) -> String {
+                let content = content.as_ref();
+                format!("{}{}{}", $begin, content, $end)
+           }
         )*
     }
 }
