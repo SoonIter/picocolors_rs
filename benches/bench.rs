@@ -1,5 +1,5 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use picocolors_rs::{bg_black, formatter as formatter_inline};
+use picocolors::{bg_black, formatter as formatter_inline};
 
 fn main_bench(b: &mut Criterion) {
   let mut group = b.benchmark_group("benchmark");

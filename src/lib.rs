@@ -1,5 +1,8 @@
-pub fn formatter(s1: &'static str, s2: &'static str) -> impl Fn(&str) -> String {
-  move |text: &str| format!("{}{}{}", s1, text, s2)
+pub fn formatter<T>(s1: &'static str, s2: &'static str) -> impl Fn(T) -> String
+where
+  T: AsRef<str>,
+{
+  move |t: T| format!("{}{}{}", s1, t.as_ref(), s2)
 }
 
 macro_rules! make_color {

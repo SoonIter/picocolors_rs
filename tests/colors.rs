@@ -3,7 +3,7 @@ macro_rules! make_test {
         $(
             #[test]
             fn $name() {
-              use picocolors_rs::$name;
+              use picocolors::$name;
               let color1: String = $name("I am a string.");
               let color2: String = $name("I am a string.".to_string());
               assert_eq!(color1, color2);
